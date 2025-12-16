@@ -5,7 +5,6 @@ export default class MyDocument extends Document {
     return (
       <Html>
         <Head>
-          <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
           <meta httpEquiv="X-Content-Type-Options" content="nosniff" />
           <meta httpEquiv="X-Frame-Options" content="DENY" />
         </Head>
