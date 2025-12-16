@@ -3,15 +3,141 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 
 const StyledWrapper = styled.div`
-  /* Ensure all rotations and animations use standard CSS properties only */
-  /* If the original content caused CSP, the styles need to be converted to pure CSS/styled-components features */
+  .radio-input {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
+    position: relative;
+  }
+
+  .radio-input input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .knob-container {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .knob {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: linear-gradient(145deg, #1a1a2e, #0f0f1a);
+    border: 3px solid #00ffff;
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.3),
+                inset 0 0 10px rgba(0, 255, 255, 0.1);
+    position: relative;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .knob:hover {
+    box-shadow: 0 0 30px rgba(0, 255, 255, 0.5),
+                inset 0 0 15px rgba(0, 255, 255, 0.2);
+  }
+
+  .knob::before {
+    content: '';
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 4px;
+    height: 30px;
+    background: #00ffff;
+    border-radius: 2px;
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.8);
+  }
+
+  .knob-label {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #00ffff;
+    font-size: 1.2rem;
+    font-weight: bold;
+    text-shadow: 0 0 10px rgba(0, 255, 255, 0.8);
+  }
+
+  .intensity-labels {
+    display: flex;
+    justify-content: space-around;
+    width: 140px;
+    margin-top: 10px;
+    font-size: 0.8rem;
+    color: #00ffff;
+    text-transform: uppercase;
+  }
+
+  .intensity-label {
+    opacity: 0.5;
+    transition: opacity 0.3s ease;
+  }
+
+  .intensity-label.active {
+    opacity: 1;
+    text-shadow: 0 0 10px rgba(0, 255, 255, 0.8);
+  }
 `;
 
-const ParanormalKnob = ({ intensity, onIntensityChange, disabled }) => {
-    // ... (The rest of the component logic) ...
-    // Note: Since this component uses radio inputs and pointer rotations, we must ensure
-    // the original CSS provided in the luca_ui.pdf is *not* copy-pasted if it contains string eval() functions.
-    // The current version is structurally safe.
-    // ...
-}
+const ParanormalKnob = ({ intensity = 50, onIntensityChange, disabled, label = "Intensity" }) => {
+  const [localIntensity, setLocalIntensity] = useState(intensity);
+  
+  const handleChange = (value) => {
+    if (!disabled) {
+      setLocalIntensity(value);
+      if (onIntensityChange) {
+        onIntensityChange(value);
+      }
+    }
+  };
+
+  // Calculate rotation based on intensity (0-100 maps to -135 to 135 degrees)
+  const rotation = ((localIntensity / 100) * 270) - 135;
+
+  const handleKnobClick = (e) => {
+    if (disabled) return;
+    
+    const knob = e.currentTarget;
+    const rect = knob.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    const angle = Math.atan2(e.clientY - centerY, e.clientX - centerX);
+    const degrees = (angle * 180) / Math.PI + 90;
+    
+    // Map degrees (-135 to 135) to intensity (0 to 100)
+    let newIntensity = ((degrees + 135) / 270) * 100;
+    newIntensity = Math.max(0, Math.min(100, newIntensity));
+    
+    handleChange(Math.round(newIntensity));
+  };
+
+  return (
+    <StyledWrapper>
+      <div className="radio-input">
+        <div className="knob-container">
+          <div className="knob" onClick={handleKnobClick} style={{ transform: `rotate(${rotation}deg)` }}>
+            <span className="knob-label">{Math.round(localIntensity)}</span>
+          </div>
+        </div>
+        <div className="intensity-labels">
+          <span className={`intensity-label ${localIntensity < 33 ? 'active' : ''}`}>Low</span>
+          <span className={`intensity-label ${localIntensity >= 33 && localIntensity < 67 ? 'active' : ''}`}>Med</span>
+          <span className={`intensity-label ${localIntensity >= 67 ? 'active' : ''}`}>High</span>
+        </div>
+      </div>
+    </StyledWrapper>
+  );
+};
+
 export default ParanormalKnob;
