@@ -259,13 +259,13 @@ export default function LucaTerminal() {
     addTerminalLine(`> Intensity adjusted to ${value}%`, 'info');
   };
 
-  const handleAnalyze = () => {
+  const handleAnalyze = useCallback(() => {
     if (!isRunning) {
       addTerminalLine('> ERROR: System must be active', 'error');
       return;
     }
     addTerminalLine('> Running analysis cycle...', 'info');
-    setTimeout(() => {
+    const timeoutId = setTimeout(() => {
       setSystemStats(prev => ({
         ...prev,
         cycles: prev.cycles + 1,
@@ -274,15 +274,16 @@ export default function LucaTerminal() {
       }));
       addTerminalLine(`> Analysis complete. Intensity factor: ${intensity}%`, 'success');
     }, 1000);
-  };
+    return () => clearTimeout(timeoutId);
+  }, [isRunning, intensity, addTerminalLine]);
 
-  const handleCalibrate = () => {
+  const handleCalibrate = useCallback(() => {
     if (!isRunning) {
       addTerminalLine('> ERROR: System must be active', 'error');
       return;
     }
     addTerminalLine('> Calibrating genome parameters...', 'info');
-    setTimeout(() => {
+    const timeoutId = setTimeout(() => {
       setSystemStats(prev => ({
         ...prev,
         integrity: Math.min(100, prev.integrity + 20),
@@ -290,9 +291,10 @@ export default function LucaTerminal() {
       }));
       addTerminalLine('> Calibration successful. Integrity restored.', 'success');
     }, 1000);
-  };
+    return () => clearTimeout(timeoutId);
+  }, [isRunning, addTerminalLine]);
 
-  const handleExecute = () => {
+  const handleExecute = useCallback(() => {
     if (!isRunning) {
       addTerminalLine('> ERROR: System must be active', 'error');
       return;
@@ -302,11 +304,12 @@ export default function LucaTerminal() {
       return;
     }
     addTerminalLine(`> EXEC: ${inputValue}`, 'info');
-    setTimeout(() => {
+    const timeoutId = setTimeout(() => {
       addTerminalLine(`> Command executed: ${inputValue}`, 'success');
       setInputValue('');
     }, 500);
-  };
+    return () => clearTimeout(timeoutId);
+  }, [isRunning, inputValue, addTerminalLine]);
 
   const handleInputKeyDown = (e) => {
     if (e.key === 'Enter') {

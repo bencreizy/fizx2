@@ -1,5 +1,5 @@
 /* components/ParanormalKnob.js (CSP SAFE VERSION) */
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 
 const StyledWrapper = styled.div`
@@ -93,6 +93,11 @@ const StyledWrapper = styled.div`
 const ParanormalKnob = ({ intensity = 50, onIntensityChange, disabled, label = "Intensity" }) => {
   const [localIntensity, setLocalIntensity] = useState(intensity);
   
+  // Sync local state with prop changes
+  useEffect(() => {
+    setLocalIntensity(intensity);
+  }, [intensity]);
+  
   const handleChange = (value) => {
     if (!disabled) {
       setLocalIntensity(value);
@@ -112,12 +117,26 @@ const ParanormalKnob = ({ intensity = 50, onIntensityChange, disabled, label = "
     const rect = knob.getBoundingClientRect();
     const centerX = rect.left + rect.width / 2;
     const centerY = rect.top + rect.height / 2;
-    const angle = Math.atan2(e.clientY - centerY, e.clientX - centerX);
-    const degrees = (angle * 180) / Math.PI + 90;
     
-    // Map degrees (-135 to 135) to intensity (0 to 100)
-    let newIntensity = ((degrees + 135) / 270) * 100;
-    newIntensity = Math.max(0, Math.min(100, newIntensity));
+    // Calculate angle from center
+    const deltaX = e.clientX - centerX;
+    const deltaY = e.clientY - centerY;
+    let angle = Math.atan2(deltaY, deltaX) * 180 / Math.PI;
+    
+    // Convert to rotation where top is 0, and ranges from -135 to 135
+    // atan2 gives us -180 to 180 where 0 is to the right
+    // We want -135 (bottom left) to 135 (bottom right), with 0 at top
+    angle = angle + 90; // Rotate so top is 0
+    
+    // Normalize to -180 to 180 range
+    if (angle > 180) angle -= 360;
+    if (angle < -180) angle += 360;
+    
+    // Clamp to valid knob range (-135 to 135)
+    angle = Math.max(-135, Math.min(135, angle));
+    
+    // Map angle to intensity (0 to 100)
+    const newIntensity = ((angle + 135) / 270) * 100;
     
     handleChange(Math.round(newIntensity));
   };
