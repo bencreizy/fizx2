@@ -3,7 +3,7 @@
 const securityHeaders = [
   {
     key: 'Content-Security-Policy',
-    value: "default-src 'self'; script-src 'self' 'nonce-{nonce}'; style-src 'self' 'nonce-{nonce}' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self';"
+    value: "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: https:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self';"
   },
   {
     key: 'X-Content-Type-Options',
@@ -37,22 +37,6 @@ const nextConfig = {
         headers: securityHeaders,
       },
     ];
-  },
-  webpack: (config, { isServer }) => {
-    // Ensure eval() is not used in the build
-    config.module.rules.push({
-      test: /\.(js|jsx|ts|tsx)$/,
-      use: {
-        loader: 'string-replace-loader',
-        options: {
-          search: /eval\s*\(/g,
-          replace: '/* eval() is blocked for security reasons */',
-          flags: 'g'
-        }
-      }
-    });
-
-    return config;
   }
 };
 

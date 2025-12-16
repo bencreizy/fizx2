@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Head from 'next/head';
 import styles from '../styles/Home.module.css';
+// Using mathjs for CSP-compliant math expression evaluation (no eval/Function needed)
+import { evaluate } from 'mathjs';
 
 /**
  * LUCA Terminal Interface Component
@@ -191,8 +193,9 @@ Thank you for using LUCA Terminal!
           else if (trimmedCommand.startsWith('calculate ')) {
             try {
               const expression = trimmedCommand.substring(10);
-              // Simple math expression evaluation (limited for security)
-              const result = Function('"use strict"; return (' + expression + ')')();
+              // Use mathjs for safe evaluation without Function() or eval()
+              // This complies with Content Security Policy restrictions
+              const result = evaluate(expression);
               responseContent = `Result: ${result}`;
               responseType = 'success';
             } catch (error) {
