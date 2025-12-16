@@ -19,7 +19,7 @@ const StyledWrapper = styled.div`
         font-size: 1.2rem; 
         cursor: pointer;
         transition: all 0.3s ease;
-        animation: none; /* Disable complex SVG/JS-based animation */
+        animation: none; /* Disables the unsafe, complex SVG/JS animation */
     }
     .voltage-button button:hover {
         background: #bb0044;
@@ -31,7 +31,7 @@ const ProfoundButton = ({ label, onClick, disabled }) => (
     <StyledWrapper>
         <div className="voltage-button">
             <button onClick={onClick} disabled={disabled}>{label}</button>
-            {/* The complex SVG logic is removed to comply with CSP */}
+            {/* The complex SVG logic is removed entirely to comply with CSP */}
         </div>
     </StyledWrapper>
 );
